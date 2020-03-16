@@ -4,6 +4,19 @@
 
 
 [点这里查看](https://blog.csdn.net/LH0912666/article/details/87897629)
+>tail   使接下来的输入都无效，只是单纯的显示在终端上
+>find / find查找目录，可以装作很厉害的样子一下子写出很多代码
+ctrl+c 在linux中是终止运行的操作
+Ctrl+d	键盘输入结束或退出终端
+Ctrl+s	暂停当前程序，暂停后按下任意键恢复运行
+Ctrl+z	将当前程序放到后台运行，恢复到前台为命令fg
+Ctrl+a	将光标移至输入行头，相当于Home键
+Ctrl+e	将光标移至输入行末，相当于End键
+Ctrl+k	删除从光标所在位置到行末
+Alt+Backspace	向前删除一个单词
+Shift+PgUp	将终端显示向上滚动
+Shift+PgDn	将终端显示向下滚动
+通配符是一种特殊语句，主要有星号（*）和问号（?），用来对字符串进行模糊匹配（比如文件名、参数名）。cd package.json可以写成 cd p****e.json，中间\*数随意
 ***
 **1.最近总是出现无法定位软件包的问题，很烦躁，最后上网查看可能是源没有更新，然后我用如下命令更新**
 >sudo apt-get update
@@ -184,3 +197,66 @@ linux-image-4.4.0-21-generic install（专业名字叫内核）
 
 linux更新内核 默认是保留 原来的 旧版本内核的 这个看看 /boot/grub/grub.conf就可以看到.安装成功之后 会自动在 这个 文件里边 加入一个新内核的 启动项的.如果没有自动加入的 话（如果楼主真的安装成功了的话）可以手工 写入启动项的 (不过还要看看/boot里面有没有 新内核引导文件),这样在启动 时就会 多一项 楼主选中新内核 进入就可以了
 如果不想要 老版本的 内核 引导项 到grub.conf把对应的 引导项删除 即可（前提 楼主一定是按照 教程 编译安装内核成功了的 哈 ， 要费很多时间的 尤其 是make的时候。。）
+
+**18.虚拟终端与伪终端的区别？**
+物理终端：直接连接在主机上的显示器、键盘鼠标统称。在实际机架式服务器部署中，一般是多台服务器共享一套终端，简称KVM（Keyboard键盘，video显示器，mouse鼠标）
+虚拟终端（tty）：附加在物理终端之上，用软件方式虚拟实现，CentOS默认启用6个虚拟终端，可以通过快捷键来切换，切换方式:Ctrl-Alt-F[1–6], 对应的文件是/dev/tty#。可以同过tty命令来查看当前的虚拟终端号。tty是teletypewriter的简称。
+伪终端(pty)：两种应用场景，第一在图形界面下打开的命令行接口（我平时用的），第二基于ssh协议或telnet协议等远程打开的命令行界面，是运维工程师用的最多的一种连接服务器的方式。pts(pseudo-terminal slave)是pty的实现方法。
+
+一台PC只有一套键盘和显示器，也就只有一套终端设备，但是可以通过Ctrl+Alt+F1~Ctrl+Alt+F6切换到字符终端，相当于有6套虚拟的终端设备，虚拟终端和串行终端的数目是有限的，然后，网络端口和图形端窗口的数目确实 不受限制的，[更多](https://blog.csdn.net/xflow_/article/details/9009545)
+
+**19.linux上压缩与解压**
+使用 zip 打包文件夹：
+> cd /home/shiyanlou
+ zip -r -q -o shiyanlou.zip /home/shiyanlou/Desktop
+ du -h shiyanlou.zip
+ file shiyanlou.zip
+
+上面命令将目录 /home/shiyanlou/Desktop 打包成一个文件，并查看了打包后文件的大小和类型。第一行命令中，-r 参数表示递归打包包含子目录的全部内容，-q 参数表示为安静模式，即不向屏幕输出信息，-o，表示输出文件，需在其后紧跟打包输出文件名。后面使用 du 命令查看打包后文件的大小（后面会具体说明该命令）。
+
+* 设置压缩级别为 9 和 1（9 最大，1 最小），重新打包：
+> zip -r -9 -q -o shiyanlou_9.zip /home/shiyanlou/Desktop -x ~/*.zip
+ zip -r -1 -q -o shiyanlou_1.zip /home/shiyanlou/Desktop -x ~/*.zip
+
+这里添加了一个参数用于设置压缩级别 -[1-9]，1 表示最快压缩但体积大，9 表示体积最小但耗时最久。最后那个 -x 是为了排除我们上一次创建的 zip 文件，否则又会被打包进这一次的压缩文件中，注意：这里只能使用绝对路径，否则不起作用。
+
+我们再用 du 命令分别查看默认压缩级别、最低、最高压缩级别及未压缩的文件的大小：
+
+>$ du -h -d 0 *.zip ~ | sort
+
+通过 man 手册可知：
+
+* h， --human-readable（顾名思义，你可以试试不加的情况）
+* d， --max-depth（所查看文件的深度）
+
+
+这样一目了然，理论上来说默认压缩级别应该是最高的，但是由于文件不大，这里的差异不明显（几乎看不出差别），不过你在环境中操作之后看到的压缩文件大小可能跟图上的有些不同，因为系统在使用过程中，会随时生成一些缓存文件在当前用户的家目录中，这对于我们学习命令使用来说，是无关紧要的，可以忽略这些不同。
+
+创建加密 zip 包
+使用 -e 参数可以创建加密压缩包：
+
+>$ zip -r -e -o shiyanlou_encryption.zip /home/shiyanlou/Desktop
+
+注意： 关于 zip 命令，因为 Windows 系统与 Linux/Unix 在文本文件格式上的一些兼容问题，比如换行符（为不可见字符），在 Windows 为 CR+LF（Carriage-Return+Line-Feed：回车加换行），而在 Linux/Unix 上为 LF（换行），所以如果在不加处理的情况下，在 Linux 上编辑的文本，在 Windows 系统上打开可能看起来是没有换行的。如果你想让你在 Linux 创建的 zip 压缩文件在 Windows 上解压后没有任何问题，那么你还需要对命令做一些修改：
+
+> zip -r -l -o shiyanlou.zip /home/shiyanlou/Desktop
+copy
+
+需要加上 -l 参数将 LF 转换为 CR+LF 来达到以上目的。
+将 shiyanlou.zip 解压到当前目录：
+
+>$ unzip shiyanlou.zip
+
+使用安静模式，将文件解压到指定目录：
+
+> unzip -q shiyanlou.zip -d ziptest
+
+上述指定目录不存在，将会自动创建。如果你不想解压只想查看压缩包的内容你可以使用 -l 参数：
+
+> unzip -l shiyanlou.zip
+
+注意： 使用 unzip 解压文件时我们同样应该注意兼容问题，不过这里我们关心的不再是上面的问题，而是中文编码的问题，通常 Windows 系统上面创建的压缩文件，如果有有包含中文的文档或以中文作为文件名的文件时默认会采用 GBK 或其它编码，而 Linux 上面默认使用的是 UTF-8 编码，如果不加任何处理，直接解压的话可能会出现中文乱码的问题（有时候它会自动帮你处理），为了解决这个问题，我们可以在解压时指定编码类型。
+
+使用 -O（英文字母，大写 o）参数指定编码类型：
+
+>unzip -O GBK 中文压缩文件.zip
