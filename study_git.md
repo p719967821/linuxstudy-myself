@@ -10,4 +10,5 @@
 此时不能合并，要人为修改，就是把另一个的部分人为录入一遍或者变成一个完全新的东西。
 2.git merge -m "merge reason" 分支名
 3.Git:更新被拒绝，因为您当前分之的最新跟新落后于其对应的远程分支的解决方法？
-https://blog.csdn.net/u012300744/article/details/80264807
+linux:https://blog.csdn.net/u012300744/article/details/80264807
+windows:https://www.cnblogs.com/dotnet261010/p/10848386.html
